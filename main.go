@@ -34,7 +34,7 @@ func RandomCloseRange(lowerLimit int, upperLimit int) int {
 }
 
 func Dice(diceSides int) int {
-	return RandomCloseRange(1, 20)
+	return RandomCloseRange(1, diceSides)
 }
 
 func Advantage(dicesSides int) int {
