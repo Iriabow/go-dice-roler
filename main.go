@@ -1,7 +1,9 @@
 package main
 
 import (
+	crand "crypto/rand"
 	"math"
+	"math/big"
 	"math/rand"
 	"os"
 	"sort"
@@ -11,18 +13,28 @@ import (
 	"github.com/go-echarts/go-echarts/v2/opts"
 )
 
-func RandomCloseRange(lower_limit int, upper_limit int) int {
+func RandomCloseRangeCryptoLevel(lowerLimit int, upperLimit int) int {
 
-	rangeSize := upper_limit - lower_limit
+	rangeSize := upperLimit - lowerLimit + 1 // +1 as generator upperLimit is open
+	nBig, _ := crand.Int(crand.Reader, big.NewInt(int64(rangeSize)))
+	randomInteger := int(nBig.Int64())
+	return lowerLimit + randomInteger
+}
 
-	source := rand.NewSource(time.Now().UnixNano())
-	random := rand.New(source)
+// Only to be initialice once, if we initialize it every time we call function, randomnes is not well distributed
+var source rand.Source = rand.NewSource(time.Now().UnixNano())
 
-	return lower_limit + random.Intn(rangeSize) + 1
+func RandomCloseRange(lowerLimit int, upperLimit int) int {
+
+	rangeSize := upperLimit - lowerLimit + 1 // +1 as generator upperLimit is open
+
+	randomizer := rand.New(source)
+
+	return lowerLimit + randomizer.Intn(rangeSize)
 }
 
 func Dice(diceSides int) int {
-	return RandomCloseRange(0, 20)
+	return RandomCloseRange(1, 20)
 }
 
 func Advantage(dicesSides int) int {
@@ -40,7 +52,8 @@ func Disadvantage(dicesSides int) int {
 func generateSamplesForBarchart(rollGenerator func(int) int, diceSides int) ([]int, []opts.BarData) {
 	rollSamples := make([]opts.BarData, 0, 40)
 	rollSamplesCount := make(map[int]int)
-	for i := 0; i < 1000000; i++ {
+	const numberOfSamples int = 1000000
+	for i := 0; i < numberOfSamples; i++ {
 		rollSample := rollGenerator(diceSides)
 		count, exists := rollSamplesCount[rollSample]
 		if exists {
