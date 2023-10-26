@@ -2,6 +2,7 @@ package main
 
 import (
 	crand "crypto/rand"
+	"fmt"
 	"math"
 	"math/big"
 	"math/rand"
@@ -47,6 +48,20 @@ func Disadvantage(dicesSides int) int {
 	firstDice := Dice(dicesSides)
 	secondDice := Dice(dicesSides)
 	return int(math.Min(float64(firstDice), float64(secondDice)))
+}
+
+func baseStatAndRoll(baseStat int) int {
+	return baseStat + Dice(100)
+}
+
+func combatResult(baseAttack int, baseDefense int) bool {
+	attackRoll := baseStatAndRoll(baseAttack)
+	defenseRoll := baseStatAndRoll(baseDefense)
+	if defenseRoll-attackRoll >= 0 {
+		return false
+	} else {
+		return true
+	}
 }
 
 func generateSamplesForBarchart(rollGenerator func(int) int, diceSides int) ([]int, []opts.BarData) {
@@ -106,5 +121,6 @@ func main() {
 	categories1, series1 := generateSamplesForBarchart(Disadvantage, 20)
 	categories2, series2 := generateSamplesForBarchart(Dice, 20)
 	categories3, series3 := generateSamplesForBarchart(Advantage, 20)
+	fmt.Println(combatResult(100, 50))
 	GenerateBarchart(categories1, series1, categories2, series2, categories3, series3)
 }
